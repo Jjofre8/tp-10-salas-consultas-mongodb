@@ -1,0 +1,1485 @@
+{
+  "info": {
+    "_postman_id": "1656bff6-e75c-4540-b7ba-cc3aad1b4d1c",
+    "name": "TP 10 - Reservas",
+    "description": "UNCA Módulo 3, TP10. IMPORTANTE: ejecutar primero las carpetas 01 y 02 si ya hay seis reservas. La carpeta 03 carga inicial contiene POST que DUPLICAN datos si se repiten: usar SOLO una vez con base vacía. La carpeta 04 prueba CRUD sobre un registro ficticio y lo elimina. Ejecutar con Postman de escritorio y servidor en localhost:3000. Guardar resultados reales en ejemplos (Save Response > Save as example) o capturas antes de exportar. Los asserts de conteos de carpeta 01 requieren exactamente las seis reservas originales y ninguna escritura adicional.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "44605738",
+    "_collection_link": "https://go.postman.co/collection/44605738-1656bff6-e75c-4540-b7ba-cc3aad1b4d1c?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "01 - Consultas correctas (seis reservas)",
+      "item": [
+        {
+          "name": "01 - Sin parámetros: 2 de 6",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Contrato de listado: solo cinco propiedades\", () => {",
+                  "  pm.expect(Object.keys(r).sort()).to.eql([\"datos\", \"pagina\", \"limite\", \"total\", \"paginas\"].sort());",
+                  "  pm.expect(r.datos).to.be.an(\"array\");",
+                  "  pm.expect(r.paginas).to.eql(Math.ceil(r.total / r.limite));",
+                  "});",
+                  "pm.test(\"Representación pública\", () => {",
+                  "  r.datos.forEach(x => {",
+                  "    pm.expect(Object.keys(x).sort()).to.eql([\"id\", \"estudiante\", \"email\", \"sala\", \"fecha\", \"turno\", \"personas\", \"estado\"].sort());",
+                  "    pm.expect(x.id).to.match(/^[a-f0-9]{24}$/i);",
+                  "    pm.expect(x).not.to.have.property(\"_id\");",
+                  "    pm.expect(x).not.to.have.property(\"__v\");",
+                  "  });",
+                  "});",
+                  "pm.test(\"Paginación por defecto\", () => {pm.expect(r.pagina).to.eql(1);pm.expect(r.limite).to.eql(2);});",
+                  "pm.test(\"Datos iniciales de seis reservas\", () => {pm.expect(r.total).to.eql(6);pm.expect(r.paginas).to.eql(3);pm.expect(r.datos).to.have.length(2);});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02 - Sala Norte: total 4",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Contrato de listado: solo cinco propiedades\", () => {",
+                  "  pm.expect(Object.keys(r).sort()).to.eql([\"datos\", \"pagina\", \"limite\", \"total\", \"paginas\"].sort());",
+                  "  pm.expect(r.datos).to.be.an(\"array\");",
+                  "  pm.expect(r.paginas).to.eql(Math.ceil(r.total / r.limite));",
+                  "});",
+                  "pm.test(\"Representación pública\", () => {",
+                  "  r.datos.forEach(x => {",
+                  "    pm.expect(Object.keys(x).sort()).to.eql([\"id\", \"estudiante\", \"email\", \"sala\", \"fecha\", \"turno\", \"personas\", \"estado\"].sort());",
+                  "    pm.expect(x.id).to.match(/^[a-f0-9]{24}$/i);",
+                  "    pm.expect(x).not.to.have.property(\"_id\");",
+                  "    pm.expect(x).not.to.have.property(\"__v\");",
+                  "  });",
+                  "});",
+                  "pm.test(\"Sala Norte\", () => {pm.expect(r.total).to.eql(4);pm.expect(r.datos).to.have.length(2);r.datos.forEach(x => pm.expect(x.sala).to.eql(\"Sala Norte\"));});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas?sala=Sala Norte",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ],
+              "query": [
+                {
+                  "key": "sala",
+                  "value": "Sala Norte"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "03 - Sala Norte, personas asc, página 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Contrato de listado: solo cinco propiedades\", () => {",
+                  "  pm.expect(Object.keys(r).sort()).to.eql([\"datos\", \"pagina\", \"limite\", \"total\", \"paginas\"].sort());",
+                  "  pm.expect(r.datos).to.be.an(\"array\");",
+                  "  pm.expect(r.paginas).to.eql(Math.ceil(r.total / r.limite));",
+                  "});",
+                  "pm.test(\"Representación pública\", () => {",
+                  "  r.datos.forEach(x => {",
+                  "    pm.expect(Object.keys(x).sort()).to.eql([\"id\", \"estudiante\", \"email\", \"sala\", \"fecha\", \"turno\", \"personas\", \"estado\"].sort());",
+                  "    pm.expect(x.id).to.match(/^[a-f0-9]{24}$/i);",
+                  "    pm.expect(x).not.to.have.property(\"_id\");",
+                  "    pm.expect(x).not.to.have.property(\"__v\");",
+                  "  });",
+                  "});",
+                  "pm.test(\"Página 1: 1 y 2 personas\", () => {pm.expect(r.total).to.eql(4);pm.expect(r.paginas).to.eql(2);pm.expect(r.datos.map(x=>x.personas)).to.eql([1,2]);});",
+                  "pm.collectionVariables.set(\"idsPagina1\", JSON.stringify(r.datos.map(x=>x.id)));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas?sala=Sala Norte&orden=personas-asc&pagina=1&limite=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ],
+              "query": [
+                {
+                  "key": "sala",
+                  "value": "Sala Norte"
+                },
+                {
+                  "key": "orden",
+                  "value": "personas-asc"
+                },
+                {
+                  "key": "pagina",
+                  "value": "1"
+                },
+                {
+                  "key": "limite",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "04 - Sala Norte, personas asc, página 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Contrato de listado: solo cinco propiedades\", () => {",
+                  "  pm.expect(Object.keys(r).sort()).to.eql([\"datos\", \"pagina\", \"limite\", \"total\", \"paginas\"].sort());",
+                  "  pm.expect(r.datos).to.be.an(\"array\");",
+                  "  pm.expect(r.paginas).to.eql(Math.ceil(r.total / r.limite));",
+                  "});",
+                  "pm.test(\"Representación pública\", () => {",
+                  "  r.datos.forEach(x => {",
+                  "    pm.expect(Object.keys(x).sort()).to.eql([\"id\", \"estudiante\", \"email\", \"sala\", \"fecha\", \"turno\", \"personas\", \"estado\"].sort());",
+                  "    pm.expect(x.id).to.match(/^[a-f0-9]{24}$/i);",
+                  "    pm.expect(x).not.to.have.property(\"_id\");",
+                  "    pm.expect(x).not.to.have.property(\"__v\");",
+                  "  });",
+                  "});",
+                  "pm.test(\"Página 2: 2 y 3 personas\", () => {pm.expect(r.total).to.eql(4);pm.expect(r.paginas).to.eql(2);pm.expect(r.datos.map(x=>x.personas)).to.eql([2,3]);});",
+                  "const prev = JSON.parse(pm.collectionVariables.get(\"idsPagina1\") || \"[]\");if(prev.length){pm.test(\"Sin IDs repetidos entre páginas\",()=>pm.expect(r.datos.map(x=>x.id).filter(id=>prev.includes(id))).to.have.length(0));}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas?sala=Sala Norte&orden=personas-asc&pagina=2&limite=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ],
+              "query": [
+                {
+                  "key": "sala",
+                  "value": "Sala Norte"
+                },
+                {
+                  "key": "orden",
+                  "value": "personas-asc"
+                },
+                {
+                  "key": "pagina",
+                  "value": "2"
+                },
+                {
+                  "key": "limite",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "05 - Sala Norte, personas descendente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Contrato de listado: solo cinco propiedades\", () => {",
+                  "  pm.expect(Object.keys(r).sort()).to.eql([\"datos\", \"pagina\", \"limite\", \"total\", \"paginas\"].sort());",
+                  "  pm.expect(r.datos).to.be.an(\"array\");",
+                  "  pm.expect(r.paginas).to.eql(Math.ceil(r.total / r.limite));",
+                  "});",
+                  "pm.test(\"Representación pública\", () => {",
+                  "  r.datos.forEach(x => {",
+                  "    pm.expect(Object.keys(x).sort()).to.eql([\"id\", \"estudiante\", \"email\", \"sala\", \"fecha\", \"turno\", \"personas\", \"estado\"].sort());",
+                  "    pm.expect(x.id).to.match(/^[a-f0-9]{24}$/i);",
+                  "    pm.expect(x).not.to.have.property(\"_id\");",
+                  "    pm.expect(x).not.to.have.property(\"__v\");",
+                  "  });",
+                  "});",
+                  "pm.test(\"Orden 3, 2, 2, 1\",()=>{pm.expect(r.datos.map(x=>x.personas)).to.eql([3,2,2,1]);});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas?sala=Sala Norte&orden=personas-desc&limite=4",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ],
+              "query": [
+                {
+                  "key": "sala",
+                  "value": "Sala Norte"
+                },
+                {
+                  "key": "orden",
+                  "value": "personas-desc"
+                },
+                {
+                  "key": "limite",
+                  "value": "4"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "06 - Sala Norte, página 3 vacía",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Contrato de listado: solo cinco propiedades\", () => {",
+                  "  pm.expect(Object.keys(r).sort()).to.eql([\"datos\", \"pagina\", \"limite\", \"total\", \"paginas\"].sort());",
+                  "  pm.expect(r.datos).to.be.an(\"array\");",
+                  "  pm.expect(r.paginas).to.eql(Math.ceil(r.total / r.limite));",
+                  "});",
+                  "pm.test(\"Representación pública\", () => {",
+                  "  r.datos.forEach(x => {",
+                  "    pm.expect(Object.keys(x).sort()).to.eql([\"id\", \"estudiante\", \"email\", \"sala\", \"fecha\", \"turno\", \"personas\", \"estado\"].sort());",
+                  "    pm.expect(x.id).to.match(/^[a-f0-9]{24}$/i);",
+                  "    pm.expect(x).not.to.have.property(\"_id\");",
+                  "    pm.expect(x).not.to.have.property(\"__v\");",
+                  "  });",
+                  "});",
+                  "pm.test(\"Página sin resultados\",()=>{pm.expect(r.datos).to.have.length(0);pm.expect(r.total).to.eql(4);pm.expect(r.paginas).to.eql(2);pm.expect(r.pagina).to.eql(3);});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas?sala=Sala Norte&pagina=3&limite=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ],
+              "query": [
+                {
+                  "key": "sala",
+                  "value": "Sala Norte"
+                },
+                {
+                  "key": "pagina",
+                  "value": "3"
+                },
+                {
+                  "key": "limite",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "07 - Sala inexistente: 200 y total 0",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Contrato de listado: solo cinco propiedades\", () => {",
+                  "  pm.expect(Object.keys(r).sort()).to.eql([\"datos\", \"pagina\", \"limite\", \"total\", \"paginas\"].sort());",
+                  "  pm.expect(r.datos).to.be.an(\"array\");",
+                  "  pm.expect(r.paginas).to.eql(Math.ceil(r.total / r.limite));",
+                  "});",
+                  "pm.test(\"Representación pública\", () => {",
+                  "  r.datos.forEach(x => {",
+                  "    pm.expect(Object.keys(x).sort()).to.eql([\"id\", \"estudiante\", \"email\", \"sala\", \"fecha\", \"turno\", \"personas\", \"estado\"].sort());",
+                  "    pm.expect(x.id).to.match(/^[a-f0-9]{24}$/i);",
+                  "    pm.expect(x).not.to.have.property(\"_id\");",
+                  "    pm.expect(x).not.to.have.property(\"__v\");",
+                  "  });",
+                  "});",
+                  "pm.test(\"Sin coincidencias\",()=>{pm.expect(r.datos).to.have.length(0);pm.expect(r.total).to.eql(0);pm.expect(r.paginas).to.eql(0);});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas?sala=Sala inexistente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ],
+              "query": [
+                {
+                  "key": "sala",
+                  "value": "Sala inexistente"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "08 - Orden por estudiante predeterminado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Contrato de listado: solo cinco propiedades\", () => {",
+                  "  pm.expect(Object.keys(r).sort()).to.eql([\"datos\", \"pagina\", \"limite\", \"total\", \"paginas\"].sort());",
+                  "  pm.expect(r.datos).to.be.an(\"array\");",
+                  "  pm.expect(r.paginas).to.eql(Math.ceil(r.total / r.limite));",
+                  "});",
+                  "pm.test(\"Representación pública\", () => {",
+                  "  r.datos.forEach(x => {",
+                  "    pm.expect(Object.keys(x).sort()).to.eql([\"id\", \"estudiante\", \"email\", \"sala\", \"fecha\", \"turno\", \"personas\", \"estado\"].sort());",
+                  "    pm.expect(x.id).to.match(/^[a-f0-9]{24}$/i);",
+                  "    pm.expect(x).not.to.have.property(\"_id\");",
+                  "    pm.expect(x).not.to.have.property(\"__v\");",
+                  "  });",
+                  "});",
+                  "pm.test(\"Orden alfabético\",()=>{const names=r.datos.map(x=>x.estudiante);pm.expect(names).to.eql([...names].sort((a,b)=>a.localeCompare(b,\"es\")));});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas?limite=6",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ],
+              "query": [
+                {
+                  "key": "limite",
+                  "value": "6"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Requiere las seis reservas de ejercicio ya cargadas, sin otras reservas."
+    },
+    {
+      "name": "02 - Validaciones HTTP 400",
+      "item": [
+        {
+          "name": "09 - pagina=0",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Error JSON\",()=>pm.expect(pm.response.json()).to.have.property(\"error\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas?pagina=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ],
+              "query": [
+                {
+                  "key": "pagina",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "10 - pagina=1.5",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Error JSON\",()=>pm.expect(pm.response.json()).to.have.property(\"error\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas?pagina=1.5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ],
+              "query": [
+                {
+                  "key": "pagina",
+                  "value": "1.5"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "11 - limite=21",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Error JSON\",()=>pm.expect(pm.response.json()).to.have.property(\"error\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas?limite=21",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ],
+              "query": [
+                {
+                  "key": "limite",
+                  "value": "21"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "12 - pagina repetida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Error JSON\",()=>pm.expect(pm.response.json()).to.have.property(\"error\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas?pagina=1&pagina=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ],
+              "query": [
+                {
+                  "key": "pagina",
+                  "value": "1"
+                },
+                {
+                  "key": "pagina",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "13 - sala vacía",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Error JSON\",()=>pm.expect(pm.response.json()).to.have.property(\"error\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas?sala=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ],
+              "query": [
+                {
+                  "key": "sala",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "14 - sala repetida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Error JSON\",()=>pm.expect(pm.response.json()).to.have.property(\"error\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas?sala=Sala Norte&sala=Sala Sur",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ],
+              "query": [
+                {
+                  "key": "sala",
+                  "value": "Sala Norte"
+                },
+                {
+                  "key": "sala",
+                  "value": "Sala Sur"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "15 - orden desconocido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Error JSON\",()=>pm.expect(pm.response.json()).to.have.property(\"error\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas?orden=otro",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ],
+              "query": [
+                {
+                  "key": "orden",
+                  "value": "otro"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "16 - select no permitido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Error JSON\",()=>pm.expect(pm.response.json()).to.have.property(\"error\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas?select=email",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ],
+              "query": [
+                {
+                  "key": "select",
+                  "value": "email"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "17 - limite vacío",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Error JSON\",()=>pm.expect(pm.response.json()).to.have.property(\"error\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas?limite=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ],
+              "query": [
+                {
+                  "key": "limite",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "18 - orden repetido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Error JSON\",()=>pm.expect(pm.response.json()).to.have.property(\"error\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas?orden=estudiante&orden=personas-asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ],
+              "query": [
+                {
+                  "key": "orden",
+                  "value": "estudiante"
+                },
+                {
+                  "key": "orden",
+                  "value": "personas-asc"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 - Carga inicial OPCIONAL (no repetir)",
+      "item": [
+        {
+          "name": "Crear Ana Ejemplo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "const r=pm.response.json();pm.test(\"Ana: estado e ID\",()=>{pm.expect(r.estado).to.eql(\"pendiente\");pm.expect(r.id).to.match(/^[a-f0-9]{24}$/i);pm.expect(pm.response.headers.get(\"Location\")).to.include(r.id);});pm.collectionVariables.set(\"idAna\",r.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudiante\": \"Ana Ejemplo\",\n  \"email\": \"ana@example.com\",\n  \"sala\": \"Sala Norte\",\n  \"fecha\": \"2026-10-28\",\n  \"turno\": \"Mañana\",\n  \"personas\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ]
+            },
+            "description": "Ejecutar SOLO si la base está vacía. No repetir: POST duplica reservas. Guardar ID y verificar Location."
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Bruno Ejemplo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "const r=pm.response.json();pm.test(\"Bruno: estado e ID\",()=>{pm.expect(r.estado).to.eql(\"pendiente\");pm.expect(r.id).to.match(/^[a-f0-9]{24}$/i);pm.expect(pm.response.headers.get(\"Location\")).to.include(r.id);});pm.collectionVariables.set(\"idBruno\",r.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudiante\": \"Bruno Ejemplo\",\n  \"email\": \"bruno@example.com\",\n  \"sala\": \"Sala Norte\",\n  \"fecha\": \"2026-10-28\",\n  \"turno\": \"Mañana\",\n  \"personas\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ]
+            },
+            "description": "Ejecutar SOLO si la base está vacía. No repetir: POST duplica reservas. Guardar ID y verificar Location."
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Carla Ejemplo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "const r=pm.response.json();pm.test(\"Carla: estado e ID\",()=>{pm.expect(r.estado).to.eql(\"pendiente\");pm.expect(r.id).to.match(/^[a-f0-9]{24}$/i);pm.expect(pm.response.headers.get(\"Location\")).to.include(r.id);});pm.collectionVariables.set(\"idCarla\",r.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudiante\": \"Carla Ejemplo\",\n  \"email\": \"carla@example.com\",\n  \"sala\": \"Sala Norte\",\n  \"fecha\": \"2026-10-28\",\n  \"turno\": \"Mañana\",\n  \"personas\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ]
+            },
+            "description": "Ejecutar SOLO si la base está vacía. No repetir: POST duplica reservas. Guardar ID y verificar Location."
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Diego Ejemplo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "const r=pm.response.json();pm.test(\"Diego: estado e ID\",()=>{pm.expect(r.estado).to.eql(\"pendiente\");pm.expect(r.id).to.match(/^[a-f0-9]{24}$/i);pm.expect(pm.response.headers.get(\"Location\")).to.include(r.id);});pm.collectionVariables.set(\"idDiego\",r.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudiante\": \"Diego Ejemplo\",\n  \"email\": \"diego@example.com\",\n  \"sala\": \"Sala Norte\",\n  \"fecha\": \"2026-10-28\",\n  \"turno\": \"Mañana\",\n  \"personas\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ]
+            },
+            "description": "Ejecutar SOLO si la base está vacía. No repetir: POST duplica reservas. Guardar ID y verificar Location."
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Elena Ejemplo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "const r=pm.response.json();pm.test(\"Elena: estado e ID\",()=>{pm.expect(r.estado).to.eql(\"pendiente\");pm.expect(r.id).to.match(/^[a-f0-9]{24}$/i);pm.expect(pm.response.headers.get(\"Location\")).to.include(r.id);});pm.collectionVariables.set(\"idElena\",r.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudiante\": \"Elena Ejemplo\",\n  \"email\": \"elena@example.com\",\n  \"sala\": \"Sala Sur\",\n  \"fecha\": \"2026-10-28\",\n  \"turno\": \"Mañana\",\n  \"personas\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ]
+            },
+            "description": "Ejecutar SOLO si la base está vacía. No repetir: POST duplica reservas. Guardar ID y verificar Location."
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Fabian Ejemplo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "const r=pm.response.json();pm.test(\"Fabian: estado e ID\",()=>{pm.expect(r.estado).to.eql(\"pendiente\");pm.expect(r.id).to.match(/^[a-f0-9]{24}$/i);pm.expect(pm.response.headers.get(\"Location\")).to.include(r.id);});pm.collectionVariables.set(\"idFabian\",r.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudiante\": \"Fabian Ejemplo\",\n  \"email\": \"fabian@example.com\",\n  \"sala\": \"Sala Multimedia\",\n  \"fecha\": \"2026-10-28\",\n  \"turno\": \"Mañana\",\n  \"personas\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ]
+            },
+            "description": "Ejecutar SOLO si la base está vacía. No repetir: POST duplica reservas. Guardar ID y verificar Location."
+          },
+          "response": []
+        },
+        {
+          "name": "Verificar GET individual de Ana",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"ID correcto\",()=>pm.expect(pm.response.json().id).to.eql(pm.collectionVariables.get(\"idAna\")));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idAna}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idAna}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Ejecutar una sola vez si la base reservas_salas_u10 está vacía. No ejecutar la colección completa si ya existen las seis reservas."
+    },
+    {
+      "name": "04 - CRUD de ejercicio (crea y elimina)",
+      "item": [
+        {
+          "name": "01 - Crear reserva de ejercicio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "const r=pm.response.json();pm.test(\"Location y pendiente\",()=>{pm.expect(r.estado).to.eql(\"pendiente\");pm.expect(pm.response.headers.get(\"Location\")).to.include(r.id);});pm.collectionVariables.set(\"idEjercicio\",r.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudiante\": \"Prueba CRUD TP10\",\n  \"email\": \"crud-tp10@example.com\",\n  \"sala\": \"Sala Sur\",\n  \"fecha\": \"2026-10-28\",\n  \"turno\": \"Tarde\",\n  \"personas\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02 - GET reserva de ejercicio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Reserva creada\",()=>pm.expect(pm.response.json().id).to.eql(pm.collectionVariables.get(\"idEjercicio\")));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idEjercicio}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idEjercicio}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "03 - PUT reemplazo completo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"PUT conserva ID y cambia estado\",()=>{const r=pm.response.json();pm.expect(r.id).to.eql(pm.collectionVariables.get(\"idEjercicio\"));pm.expect(r.estado).to.eql(\"confirmada\");pm.expect(r.personas).to.eql(3);});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudiante\": \"Prueba CRUD Modificada\",\n  \"email\": \"crud-tp10@example.com\",\n  \"sala\": \"Sala Sur\",\n  \"fecha\": \"2026-10-28\",\n  \"turno\": \"Tarde\",\n  \"personas\": 3,\n  \"estado\": \"confirmada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idEjercicio}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idEjercicio}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "04 - PATCH personas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"PATCH conserva estado\",()=>{const r=pm.response.json();pm.expect(r.personas).to.eql(4);pm.expect(r.estado).to.eql(\"confirmada\");});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personas\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idEjercicio}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idEjercicio}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "05 - DELETE reserva de ejercicio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));",
+                  "pm.test(\"Sin cuerpo\",()=>pm.expect(pm.response.text()).to.eql(\"\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idEjercicio}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idEjercicio}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "06 - GET tras DELETE: 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservas/{{idEjercicio}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "{{idEjercicio}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Ejecutar los seis casos en orden; usa idEjercicio guardado en variables. Escribe en MongoDB temporalmente."
+    },
+    {
+      "name": "05 - Continuidad HTML y estado",
+      "item": [
+        {
+          "name": "Estado global",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Estado y contador\",()=>{const r=pm.response.json();pm.expect(r.servicio).to.eql(\"activo\");pm.expect(r.reservas).to.be.a(\"number\");});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "estado"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "HTML listado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"HTML\",()=>pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"text/html\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "HTML formulario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reservas/nueva",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservas",
+                "nueva"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "idEjercicio",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "idAna",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "idsPagina1",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
