@@ -1,45 +1,103 @@
 const { URL } = require("node:url");
 
 function crearControladorReservasApi(servicio) {
-  // GET /api/reservas
   async function listar(req, res) {
     const url = new URL(req.originalUrl, "http://localhost");
     const parametros = url.searchParams;
 
+    const permitidos = ["sala", "orden", "pagina", "limite"];
+
     for (const nombre of parametros.keys()) {
-      if (nombre !== "sala") {
+      if (!permitidos.includes(nombre)) {
         return res.status(400).json({
-          error: "Solo se permite filtrar por sala.",
+          error: `El parámetro ${nombre} no está permitido.`,
         });
       }
     }
 
-    const salas = parametros.getAll("sala");
-
-    if (salas.length > 1) {
-      return res.status(400).json({
-        error: "El parámetro sala no puede repetirse.",
-      });
+    for (const nombre of permitidos) {
+      if (parametros.getAll(nombre).length > 1) {
+        return res.status(400).json({
+          error: `El parámetro ${nombre} no puede repetirse.`,
+        });
+      }
     }
 
     let sala;
+    let orden = "estudiante";
+    let pagina = 1;
+    let limite = 2;
 
-    if (salas.length === 1) {
-      sala = salas[0];
+    if (parametros.has("sala")) {
+      sala = parametros.get("sala").trim();
 
-      if (sala.trim() === "") {
+      if (sala === "") {
         return res.status(400).json({
           error: "El filtro sala no puede estar vacío.",
         });
       }
     }
 
-    const reservas = await servicio.listar(sala);
+    if (parametros.has("orden")) {
+      orden = parametros.get("orden").trim();
 
-    return res.status(200).json(reservas);
+      if (
+        orden !== "estudiante" &&
+        orden !== "personas-asc" &&
+        orden !== "personas-desc"
+      ) {
+        return res.status(400).json({
+          error: "El orden solicitado no es válido.",
+        });
+      }
+    }
+
+    if (parametros.has("pagina")) {
+      const textoPagina = parametros.get("pagina");
+
+      if (textoPagina.trim() === "") {
+        return res.status(400).json({
+          error: "La página no puede estar vacía.",
+        });
+      }
+
+      pagina = Number(textoPagina);
+
+      if (!Number.isInteger(pagina) || pagina < 1 || pagina > 1000) {
+        return res.status(400).json({
+          error: "La página debe ser un entero entre 1 y 1000.",
+        });
+      }
+    }
+
+    if (parametros.has("limite")) {
+      const textoLimite = parametros.get("limite");
+
+      if (textoLimite.trim() === "") {
+        return res.status(400).json({
+          error: "El límite no puede estar vacío.",
+        });
+      }
+
+      limite = Number(textoLimite);
+
+      if (!Number.isInteger(limite) || limite < 1 || limite > 20) {
+        return res.status(400).json({
+          error: "El límite debe ser un entero entre 1 y 20.",
+        });
+      }
+    }
+
+    const resultado = await servicio.consultar({
+      sala,
+      orden,
+      pagina,
+      limite,
+    });
+
+    return res.status(200).json(resultado);
   }
 
-  // GET /api/reservas/:id
   async function detalle(req, res) {
     const id = req.params.id;
 
@@ -60,7 +118,6 @@ function crearControladorReservasApi(servicio) {
     return res.status(200).json(reserva);
   }
 
-  // POST /api/reservas
   async function crear(req, res) {
     const reserva = await servicio.crear(req.reservaValidada);
 
@@ -69,7 +126,6 @@ function crearControladorReservasApi(servicio) {
     return res.status(201).json(reserva);
   }
 
-  // PUT /api/reservas/:id
   async function reemplazar(req, res) {
     const id = req.params.id;
 
@@ -90,7 +146,6 @@ function crearControladorReservasApi(servicio) {
     return res.status(200).json(reserva);
   }
 
-  // PATCH /api/reservas/:id
   async function modificarParcialmente(req, res) {
     const id = req.params.id;
 
@@ -114,7 +169,6 @@ function crearControladorReservasApi(servicio) {
     return res.status(200).json(reserva);
   }
 
-  // DELETE /api/reservas/:id
   async function eliminar(req, res) {
     const id = req.params.id;
 

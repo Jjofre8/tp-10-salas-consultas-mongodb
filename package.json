@@ -1,6 +1,5 @@
-
 {
-  "name": "tp-09-salas-crud-mongodb",
+  "name": "tp-10-salas-consultas-mongodb",
   "version": "1.0.0",
   "description": "Trabajo Práctico 09 - CRUD de reservas de salas con Express 5, MongoDB Atlas y Mongoose",
   "main": "src/index.js",

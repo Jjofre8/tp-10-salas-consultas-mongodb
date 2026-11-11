@@ -27,7 +27,6 @@ function validarId(id) {
 }
 
 function crearServicioReservas() {
-  // GET - Listar reservas
   async function listar(sala) {
     const criterio = {};
 
@@ -40,7 +39,48 @@ function crearServicioReservas() {
     return reservas.map(convertirReserva);
   }
 
-  // GET - Buscar reserva por ID
+  async function consultar({
+    sala,
+    orden = "estudiante",
+    pagina = 1,
+    limite = 2,
+  } = {}) {
+    const filtro = {};
+
+    if (sala !== undefined) {
+      filtro.sala = sala.trim();
+    }
+
+    let criterioOrden = { estudiante: 1, _id: 1 };
+
+    if (orden === "personas-asc") {
+      criterioOrden = { personas: 1, _id: 1 };
+    }
+
+    if (orden === "personas-desc") {
+      criterioOrden = { personas: -1, _id: 1 };
+    }
+
+    const salto = (pagina - 1) * limite;
+
+    const total = await Reserva.countDocuments(filtro);
+
+    const reservas = await Reserva.find(filtro)
+      .select("estudiante email sala fecha turno personas estado")
+      .sort(criterioOrden)
+      .skip(salto)
+      .limit(limite)
+      .lean();
+
+    return {
+      datos: reservas.map(convertirReserva),
+      pagina,
+      limite,
+      total,
+      paginas: Math.ceil(total / limite),
+    };
+  }
+
   async function buscarPorId(id) {
     validarId(id);
 
@@ -49,12 +89,10 @@ function crearServicioReservas() {
     return reserva ? convertirReserva(reserva) : null;
   }
 
-  // Contar reservas persistentes
   async function contar() {
     return Reserva.countDocuments({});
   }
 
-  // POST - Crear reserva
   async function crear(datos) {
     const nuevaReserva = new Reserva({
       estudiante: datos.estudiante,
@@ -70,7 +108,6 @@ function crearServicioReservas() {
     return convertirReserva(reservaGuardada.toObject());
   }
 
-  // PUT - Reemplazar los siete campos editables
   async function reemplazar(id, datos) {
     validarId(id);
 
@@ -93,7 +130,6 @@ function crearServicioReservas() {
     return reserva ? convertirReserva(reserva) : null;
   }
 
-  // PATCH - Modificar únicamente personas y estado
   async function modificarParcialmente(id, datos) {
     validarId(id);
 
@@ -120,7 +156,6 @@ function crearServicioReservas() {
     return reserva ? convertirReserva(reserva) : null;
   }
 
-  // DELETE - Eliminación física de una reserva
   async function eliminar(id) {
     validarId(id);
 
@@ -139,6 +174,7 @@ function crearServicioReservas() {
 
   return {
     listar,
+    consultar,
     buscarPorId,
     contar,
     crear,
